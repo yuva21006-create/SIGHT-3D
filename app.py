@@ -1,6 +1,4 @@
 import streamlit as st
-import subprocess
-import sys
 import os
 
 # ============================================================
@@ -75,6 +73,112 @@ st.markdown("""
 
 
 # ============================================================
+# SESSION STATE
+# ============================================================
+
+if "running_module" not in st.session_state:
+    st.session_state.running_module = None
+
+
+# ============================================================
+# MODULE RUNNER
+# ============================================================
+
+def run_module(module_name, filename):
+
+    base_folder = os.path.dirname(
+        os.path.abspath(__file__)
+    )
+
+    file_path = os.path.join(
+        base_folder,
+        filename
+    )
+
+    if not os.path.exists(file_path):
+
+        st.error(
+            f"❌ {filename} was not found in the repository."
+        )
+
+        return
+
+    # --------------------------------------------------------
+    # BACK BUTTON
+    # --------------------------------------------------------
+
+    if st.button(
+        "⬅️ BACK TO N-SAGE HOME",
+        key=f"back_{module_name}"
+    ):
+
+        st.session_state.running_module = None
+        st.rerun()
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # LOAD MODULE
+    # --------------------------------------------------------
+
+    try:
+
+        if module_name == "bridge":
+
+            import bridge
+
+        elif module_name == "landslide":
+
+            import landslide
+
+        elif module_name == "flood":
+
+            import flood
+
+    except Exception as e:
+
+        st.error(
+            f"❌ Unable to load {filename}"
+        )
+
+        st.exception(e)
+
+
+# ============================================================
+# IF A MODULE IS RUNNING
+# ============================================================
+
+if st.session_state.running_module == "bridge":
+
+    run_module(
+        "bridge",
+        "bridge.py"
+    )
+
+    st.stop()
+
+
+elif st.session_state.running_module == "landslide":
+
+    run_module(
+        "landslide",
+        "landslide.py"
+    )
+
+    st.stop()
+
+
+elif st.session_state.running_module == "flood":
+
+    run_module(
+        "flood",
+        "flood.py"
+    )
+
+    st.stop()
+
+
+# ============================================================
 # HEADER
 # ============================================================
 
@@ -124,7 +228,8 @@ disaster = st.radio(
         "⛰️ Landslide",
         "🏠 Residential Flood"
     ],
-    horizontal=True
+    horizontal=True,
+    key="disaster_selection"
 )
 
 st.divider()
@@ -167,7 +272,7 @@ if disaster == "🌉 Bridge Collapse":
     </div>
     """, unsafe_allow_html=True)
 
-    selected_file = "bridge.py"
+    selected_module = "bridge"
 
 
 # ============================================================
@@ -207,7 +312,7 @@ elif disaster == "⛰️ Landslide":
     </div>
     """, unsafe_allow_html=True)
 
-    selected_file = "landslide.py"
+    selected_module = "landslide"
 
 
 # ============================================================
@@ -247,7 +352,7 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-    selected_file = "flood.py"
+    selected_module = "flood"
 
 
 # ============================================================
@@ -265,64 +370,20 @@ st.write(
 start = st.button(
     "🚀 START SELECTED SIMULATION",
     use_container_width=True,
-    type="primary"
+    type="primary",
+    key="start_selected_simulation"
 )
 
 
 # ============================================================
-# START MODULE
+# START MODULE — SAME TAB
 # ============================================================
 
 if start:
 
-    base_folder = os.path.dirname(
-        os.path.abspath(__file__)
-    )
+    st.session_state.running_module = selected_module
 
-    file_path = os.path.join(
-        base_folder,
-        selected_file
-    )
-
-    if not os.path.exists(file_path):
-
-        st.error(
-            f"❌ {selected_file} does not exist."
-        )
-
-        st.warning(
-            "Create the required Python file in the same "
-            "folder as app.py."
-        )
-
-    else:
-
-        try:
-
-            subprocess.Popen(
-                [
-                    sys.executable,
-                    "-m",
-                    "streamlit",
-                    "run",
-                    file_path
-                ],
-                cwd=base_folder
-            )
-
-            st.success(
-                f"✅ {disaster} module launched successfully!"
-            )
-
-            st.info(
-                "The simulation should open in a new browser tab."
-            )
-
-        except Exception as e:
-
-            st.error(
-                f"Unable to launch module: {e}"
-            )
+    st.rerun()
 
 
 # ============================================================
