@@ -11,6 +11,10 @@ st.set_page_config(
     layout="wide"
 )
 
+# Multi-Page Navigation - Session State Maintenance
+if "page" not in st.session_state:
+    st.session_state.page = "dashboard"
+
 # ============================================================
 # CSS
 # ============================================================
@@ -73,484 +77,184 @@ st.markdown("""
 
 
 # ============================================================
-# SESSION STATE
+# NAVIGATION CONTROLLER
 # ============================================================
 
-if "running_module" not in st.session_state:
-    st.session_state.running_module = None
-
+def run_selected_page(page_name):
+    base_folder = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_folder, page_name)
+    
+    if os.path.exists(file_path):
+        if st.sidebar.button("⬅️ Back to Main Dashboard", type="secondary"):
+            st.session_state.page = "dashboard"
+            st.rerun()
+        
+        st.sidebar.divider()
+        st.sidebar.info(f"Currently Running: **{page_name}**")
+        
+        # Selected python file-ஐ இயக்க
+        with open(file_path, "r", encoding="utf-8") as f:
+            code = f.read()
+            exec(code, globals())
+    else:
+        st.error(f"❌ {page_name} does not exist.")
+        st.warning("Create the required Python file in the same folder as app.py.")
+        if st.button("⬅️ Return to Dashboard"):
+            st.session_state.page = "dashboard"
+            st.rerun()
 
 # ============================================================
-# MODULE RUNNER
+# MAIN DASHBOARD VIEW
 # ============================================================
 
-def run_module(module_name, filename):
+if st.session_state.page == "dashboard":
 
-    base_folder = os.path.dirname(
-        os.path.abspath(__file__)
+    # HEADER
+    st.markdown('<div class="main-title">🛰️ N-SAGE</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="subtitle">AI-Based Multi-Disaster Risk Analysis & Emergency Response System</div>',
+        unsafe_allow_html=True
     )
 
-    file_path = os.path.join(
-        base_folder,
-        filename
-    )
-
-    if not os.path.exists(file_path):
-
-        st.error(
-            f"❌ {filename} was not found in the repository."
-        )
-
-        return
-
-    # --------------------------------------------------------
-    # BACK BUTTON
-    # --------------------------------------------------------
-
-    if st.button(
-        "⬅️ BACK TO N-SAGE HOME",
-        key=f"back_{module_name}"
-    ):
-
-        st.session_state.running_module = None
-        st.rerun()
+    st.markdown("""
+    <div class="hero">
+    <b>N-SAGE</b> is a prototype disaster-risk simulation platform designed to analyse environmental conditions and demonstrate possible disaster scenarios.
+    <br><br>
+    🌧️ Environmental Conditions → 🧠 Risk Analysis → 🎬 Disaster Simulation → 🚨 Emergency Assessment → 🗺️ Response
+    </div>
+    """, unsafe_allow_html=True)
 
     st.divider()
 
-    # --------------------------------------------------------
-    # LOAD MODULE
-    # --------------------------------------------------------
+    # DISASTER SELECTION
+    st.header("🚨 Select Disaster Scenario")
 
-    try:
-
-        if module_name == "bridge":
-
-            import bridge
-
-        elif module_name == "landslide":
-
-            import landslide
-
-        elif module_name == "flood":
-
-            import flood
-
-    except Exception as e:
-
-        st.error(
-            f"❌ Unable to load {filename}"
-        )
-
-        st.exception(e)
-
-
-# ============================================================
-# IF A MODULE IS RUNNING
-# ============================================================
-
-if st.session_state.running_module == "bridge":
-
-    run_module(
-        "bridge",
-        "bridge.py"
+    disaster = st.radio(
+        "Choose the disaster you want to analyse:",
+        [
+            "🌉 Bridge Collapse",
+            "⛰️ Landslide",
+            "🏠 Residential Flood"
+        ],
+        horizontal=True
     )
 
-    st.stop()
-
-
-elif st.session_state.running_module == "landslide":
-
-    run_module(
-        "landslide",
-        "landslide.py"
-    )
-
-    st.stop()
-
-
-elif st.session_state.running_module == "flood":
-
-    run_module(
-        "flood",
-        "flood.py"
-    )
-
-    st.stop()
-
-
-# ============================================================
-# HEADER
-# ============================================================
-
-st.markdown(
-    '<div class="main-title">🛰️ N-SAGE</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="subtitle">'
-    'AI-Based Multi-Disaster Risk Analysis & Emergency Response System'
-    '</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown("""
-<div class="hero">
-
-<b>N-SAGE</b> is a prototype disaster-risk simulation platform
-designed to analyse environmental conditions and demonstrate
-possible disaster scenarios.
-
-<br><br>
-
-🌧️ Environmental Conditions →
-🧠 Risk Analysis →
-🎬 Disaster Simulation →
-🚨 Emergency Assessment →
-🗺️ Response
-
-</div>
-""", unsafe_allow_html=True)
-
-st.divider()
-
-
-# ============================================================
-# DISASTER SELECTION
-# ============================================================
-
-st.header("🚨 Select Disaster Scenario")
-
-disaster = st.radio(
-    "Choose the disaster you want to analyse:",
-    [
-        "🌉 Bridge Collapse",
-        "⛰️ Landslide",
-        "🏠 Residential Flood"
-    ],
-    horizontal=True,
-    key="disaster_selection"
-)
-
-st.divider()
-
-
-# ============================================================
-# BRIDGE
-# ============================================================
-
-if disaster == "🌉 Bridge Collapse":
-
-    st.markdown("""
-    <div class="card">
-
-    <div class="card-title">
-    🌉 Bridge Collapse
-    </div>
-
-    <br>
-
-    <div class="card-text">
-
-    Simulates the effect of extreme rainfall and rising
-    water conditions on a bridge.
-
-    <br><br>
-
-    🌧️ Rainfall / Water Level<br>
-    ↓<br>
-    🌊 Flood Condition<br>
-    ↓<br>
-    🌉 Bridge Risk<br>
-    ↓<br>
-    💥 Structural Failure Simulation<br>
-    ↓<br>
-    🛣️ Traffic Diversion
-
-    </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    selected_module = "bridge"
-
-
-# ============================================================
-# LANDSLIDE
-# ============================================================
-
-elif disaster == "⛰️ Landslide":
-
-    st.markdown("""
-    <div class="card">
-
-    <div class="card-title">
-    ⛰️ Landslide
-    </div>
-
-    <br>
-
-    <div class="card-text">
-
-    Simulates rainfall-induced slope instability and
-    possible road blockage.
-
-    <br><br>
-
-    🌧️ Rainfall<br>
-    ↓<br>
-    ⛰️ Slope Instability<br>
-    ↓<br>
-    🪨 Landslide Simulation<br>
-    ↓<br>
-    🚧 Road Blockage<br>
-    ↓<br>
-    🛣️ Safe Diversion
-
-    </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    selected_module = "landslide"
-
-
-# ============================================================
-# FLOOD
-# ============================================================
-
-else:
-
-    st.markdown("""
-    <div class="card">
-
-    <div class="card-title">
-    🏠 Residential Flood
-    </div>
-
-    <br>
-
-    <div class="card-text">
-
-    Simulates increasing rainfall, flood depth and
-    residential impact.
-
-    <br><br>
-
-    🌧️ Rainfall<br>
-    ↓<br>
-    🌊 Flood Formation<br>
-    ↓<br>
-    🏠 Residential Impact<br>
-    ↓<br>
-    🚨 Emergency Assessment<br>
-    ↓<br>
-    🧭 Evacuation Response
-
-    </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    selected_module = "flood"
-
-
-# ============================================================
-# SIMULATION CONTROL
-# ============================================================
-
-st.divider()
-
-st.header("🎬 Simulation Control")
-
-st.write(
-    f"### Selected Scenario: {disaster}"
-)
-
-start = st.button(
-    "🚀 START SELECTED SIMULATION",
-    use_container_width=True,
-    type="primary",
-    key="start_selected_simulation"
-)
-
-
-# ============================================================
-# START MODULE — SAME TAB
-# ============================================================
-
-if start:
-
-    st.session_state.running_module = selected_module
-
-    st.rerun()
-
-
-# ============================================================
-# N-SAGE SYSTEM OVERVIEW
-# ============================================================
-
-st.divider()
-
-st.header("🧠 N-SAGE Disaster Intelligence")
-
-c1, c2, c3 = st.columns(3)
-
-with c1:
-
-    st.metric(
-        "🌉 Infrastructure",
-        "Bridge Collapse"
-    )
-
-    st.caption(
-        "Flood-induced bridge failure simulation"
-    )
-
-
-with c2:
-
-    st.metric(
-        "⛰️ Geohazard",
-        "Landslide"
-    )
-
-    st.caption(
-        "Rainfall-induced slope failure simulation"
-    )
-
-
-with c3:
-
-    st.metric(
-        "🏠 Urban",
-        "Residential Flood"
-    )
-
-    st.caption(
-        "Residential flood and evacuation simulation"
-    )
-
-
-# ============================================================
-# COMMON WORKFLOW
-# ============================================================
-
-st.divider()
-
-st.header("⚙️ N-SAGE Common Workflow")
-
-steps = st.columns(5)
-
-with steps[0]:
-
-    st.markdown("""
-    <div class="flow">
-    <h2>🌧️</h2>
-    <b>Environmental Input</b>
-    <br>
-    <small>Rainfall / water conditions</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-with steps[1]:
-
-    st.markdown("""
-    <div class="flow">
-    <h2>🧠</h2>
-    <b>Risk Analysis</b>
-    <br>
-    <small>Risk score calculation</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-with steps[2]:
-
-    st.markdown("""
-    <div class="flow">
-    <h2>🎬</h2>
-    <b>Simulation</b>
-    <br>
-    <small>Visual disaster scenario</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-with steps[3]:
-
-    st.markdown("""
-    <div class="flow">
-    <h2>🚨</h2>
-    <b>Emergency Assessment</b>
-    <br>
-    <small>Severity detection</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-with steps[4]:
-
-    st.markdown("""
-    <div class="flow">
-    <h2>🗺️</h2>
-    <b>Response</b>
-    <br>
-    <small>Diversion / evacuation</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# ============================================================
-# MODULE STATUS
-# ============================================================
-
-st.divider()
-
-st.header("📡 System Module Status")
-
-base_folder = os.path.dirname(
-    os.path.abspath(__file__)
-)
-
-modules = [
-    ("🌉 Bridge Collapse", "bridge.py"),
-    ("⛰️ Landslide", "landslide.py"),
-    ("🏠 Residential Flood", "flood.py")
-]
-
-for module_name, filename in modules:
-
-    path = os.path.join(
-        base_folder,
-        filename
-    )
-
-    if os.path.exists(path):
-
-        st.success(
-            f"🟢 {module_name} — READY"
-        )
+    st.divider()
+
+    # DISASTER CARDS
+    if disaster == "🌉 Bridge Collapse":
+        st.markdown("""
+        <div class="card">
+        <div class="card-title">🌉 Bridge Collapse</div>
+        <br>
+        <div class="card-text">
+        Simulates the effect of extreme rainfall and rising water conditions on a bridge.
+        <br><br>
+        🌧️ Rainfall / Water Level → 🌊 Flood Condition → 🌉 Bridge Risk → 💥 Structural Failure Simulation → 🛣️ Traffic Diversion
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
+        selected_file = "bridge.py"
+
+    elif disaster == "⛰️ Landslide":
+        st.markdown("""
+        <div class="card">
+        <div class="card-title">⛰️ Landslide</div>
+        <br>
+        <div class="card-text">
+        Simulates rainfall-induced slope instability and possible road blockage.
+        <br><br>
+        🌧️ Rainfall → ⛰️ Slope Instability → 🪨 Landslide Simulation → 🚧 Road Blockage → 🛣️ Safe Diversion
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
+        selected_file = "landslide.py"
 
     else:
+        st.markdown("""
+        <div class="card">
+        <div class="card-title">🏠 Residential Flood</div>
+        <br>
+        <div class="card-text">
+        Simulates increasing rainfall, flood depth and residential impact.
+        <br><br>
+        🌧️ Rainfall → 🌊 Flood Formation → 🏠 Residential Impact → 🚨 Emergency Assessment → 🧭 Evacuation Response
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
+        selected_file = "flood.py"
 
-        st.warning(
-            f"🟡 {module_name} — FILE NOT FOUND"
-        )
+    # SIMULATION CONTROL
+    st.divider()
+    st.header("🎬 Simulation Control")
+    st.write(f"### Selected Scenario: {disaster}")
 
+    if st.button("🚀 START SELECTED SIMULATION", use_container_width=True, type="primary"):
+        st.session_state.page = selected_file
+        st.rerun()
+
+    # SYSTEM OVERVIEW
+    st.divider()
+    st.header("🧠 N-SAGE Disaster Intelligence")
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.metric("🌉 Infrastructure", "Bridge Collapse")
+        st.caption("Flood-induced bridge failure simulation")
+    with c2:
+        st.metric("⛰️ Geohazard", "Landslide")
+        st.caption("Rainfall-induced slope failure simulation")
+    with c3:
+        st.metric("🏠 Urban", "Residential Flood")
+        st.caption("Residential flood and evacuation simulation")
+
+    # COMMON WORKFLOW
+    st.divider()
+    st.header("⚙️ N-SAGE Common Workflow")
+
+    steps = st.columns(5)
+    with steps[0]:
+        st.markdown('<div class="flow"><h2>🌧️</h2><b>Environmental Input</b><br><small>Rainfall / water conditions</small></div>', unsafe_allow_html=True)
+    with steps[1]:
+        st.markdown('<div class="flow"><h2>🧠</h2><b>Risk Analysis</b><br><small>Risk score calculation</small></div>', unsafe_allow_html=True)
+    with steps[2]:
+        st.markdown('<div class="flow"><h2>🎬</h2><b>Simulation</b><br><small>Visual disaster scenario</small></div>', unsafe_allow_html=True)
+    with steps[3]:
+        st.markdown('<div class="flow"><h2>🚨</h2><b>Emergency Assessment</b><br><small>Severity detection</small></div>', unsafe_allow_html=True)
+    with steps[4]:
+        st.markdown('<div class="flow"><h2>🗺️</h2><b>Response</b><br><small>Diversion / evacuation</small></div>', unsafe_allow_html=True)
+
+    # MODULE STATUS
+    st.divider()
+    st.header("📡 System Module Status")
+
+    base_folder = os.path.dirname(os.path.abspath(__file__))
+    modules = [
+        ("🌉 Bridge Collapse", "bridge.py"),
+        ("⛰️ Landslide", "landslide.py"),
+        ("🏠 Residential Flood", "flood.py")
+    ]
+
+    for module_name, filename in modules:
+        path = os.path.join(base_folder, filename)
+        if os.path.exists(path):
+            st.success(f"🟢 {module_name} — READY")
+        else:
+            st.warning(f"🟡 {module_name} — FILE NOT FOUND")
+
+    # DISCLAIMER
+    st.divider()
+    st.info(
+        "⚠️ N-SAGE is a prototype demonstration system. "
+        "Risk scores, thresholds, simulations, diversion "
+        "recommendations and evacuation responses are "
+        "illustrative only and must not be treated as real "
+        "structural engineering predictions or real-world "
+        "emergency-navigation instructions."
+    )
 
 # ============================================================
-# DISCLAIMER
+# MODULE EXECUTION VIEW
 # ============================================================
-
-st.divider()
-
-st.info(
-    "⚠️ N-SAGE is a prototype demonstration system. "
-    "Risk scores, thresholds, simulations, diversion "
-    "recommendations and evacuation responses are "
-    "illustrative only and must not be treated as real "
-    "structural engineering predictions or real-world "
-    "emergency-navigation instructions."
-)
+else:
+    run_selected_page(st.session_state.page)
