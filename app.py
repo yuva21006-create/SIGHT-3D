@@ -1,9 +1,4 @@
 import streamlit as st
-import importlib
-
-# ============================================================
-# N-SAGE MAIN APPLICATION
-# ============================================================
 
 st.set_page_config(
     page_title="N-SAGE",
@@ -39,7 +34,7 @@ if st.session_state.page == "home":
     st.divider()
 
     # ========================================================
-    # RESIDENTIAL FLOOD
+    # FLOOD
     # ========================================================
 
     st.header("🌊 Residential Flood Analysis")
@@ -51,10 +46,31 @@ if st.session_state.page == "home":
 
     if st.button(
         "🌊 OPEN RESIDENTIAL FLOOD SIMULATION",
-        use_container_width=True,
-        key="open_flood_button"
+        key="open_flood",
+        use_container_width=True
     ):
         st.session_state.page = "flood"
+        st.rerun()
+
+    st.divider()
+
+    # ========================================================
+    # BRIDGE COLLAPSE
+    # ========================================================
+
+    st.header("🌉 Bridge Collapse Analysis")
+
+    st.write(
+        "Analyse extreme rainfall, flood conditions, bridge "
+        "structural risk and possible bridge-collapse scenarios."
+    )
+
+    if st.button(
+        "🌉 OPEN BRIDGE COLLAPSE SIMULATION",
+        key="open_bridge",
+        use_container_width=True
+    ):
+        st.session_state.page = "bridge"
         st.rerun()
 
     st.divider()
@@ -66,13 +82,13 @@ if st.session_state.page == "home":
     st.header("⛰️ Landslide Analysis")
 
     st.write(
-        "Analyse landslide conditions and terrain-related risks."
+        "Analyse rainfall and terrain-related landslide risks."
     )
 
     if st.button(
         "⛰️ OPEN LANDSLIDE SIMULATION",
-        use_container_width=True,
-        key="open_landslide_button"
+        key="open_landslide",
+        use_container_width=True
     ):
         st.session_state.page = "landslide"
         st.rerun()
@@ -93,29 +109,46 @@ elif st.session_state.page == "flood":
 
     if st.button(
         "⬅️ BACK TO N-SAGE HOME",
-        key="back_home_flood"
+        key="back_from_flood"
     ):
         st.session_state.page = "home"
         st.rerun()
 
     st.divider()
 
-    # --------------------------------------------------------
-    # LOAD / RELOAD FLOOD MODULE
-    # --------------------------------------------------------
-
     try:
 
         import flood
 
-        # IMPORTANT:
-        # Reload flood.py on every Streamlit rerun so that
-        # SIMULATE FLOOD buttons work correctly.
-        importlib.reload(flood)
-
     except Exception as e:
 
         st.error("❌ Unable to load flood.py")
+
+        st.exception(e)
+
+
+# ============================================================
+# BRIDGE COLLAPSE PAGE
+# ============================================================
+
+elif st.session_state.page == "bridge":
+
+    if st.button(
+        "⬅️ BACK TO N-SAGE HOME",
+        key="back_from_bridge"
+    ):
+        st.session_state.page = "home"
+        st.rerun()
+
+    st.divider()
+
+    try:
+
+        import bridge
+
+    except Exception as e:
+
+        st.error("❌ Unable to load bridge.py")
 
         st.exception(e)
 
@@ -128,7 +161,7 @@ elif st.session_state.page == "landslide":
 
     if st.button(
         "⬅️ BACK TO N-SAGE HOME",
-        key="back_home_landslide"
+        key="back_from_landslide"
     ):
         st.session_state.page = "home"
         st.rerun()
@@ -138,8 +171,6 @@ elif st.session_state.page == "landslide":
     try:
 
         import landslide
-
-        importlib.reload(landslide)
 
     except Exception as e:
 
