@@ -1,6 +1,5 @@
 streamlit
 numpy
-pandas
 rasterio
 pyvista
 stpyvista
