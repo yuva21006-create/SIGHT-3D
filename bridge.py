@@ -1,298 +1,166 @@
 import streamlit as st
-import time
 
 st.header("🌉 Bridge Collapse Simulation")
 
-st.write(
-    "N-SAGE simulates how increasing rainfall and flood conditions "
-    "may affect a bridge."
-)
-
-# ---------------- BACK BUTTON ----------------
-
-if st.button("⬅️ BACK TO N-SAGE HOME", key="bridge_back"):
+if st.button("⬅️ BACK TO N-SAGE HOME", key="bridge_home"):
     st.session_state.page = "home"
     st.rerun()
 
 st.divider()
 
-# ---------------- INPUT ----------------
-
-st.subheader("🌧️ Environmental Condition")
-
 rainfall = st.slider(
-    "Expected Rainfall (mm)",
+    "🌧️ Rainfall (mm)",
     0,
     1000,
     500,
     10,
-    key="bridge_rainfall"
+    key="bridge_rain"
 )
 
-st.metric("🌧️ Selected Rainfall", f"{rainfall} mm")
+water_level = st.slider(
+    "🌊 Water Level (m)",
+    0.0,
+    10.0,
+    5.0,
+    0.1,
+    key="bridge_water"
+)
 
-# ---------------- SIMULATION ----------------
+bridge_condition = st.slider(
+    "🌉 Bridge Condition (%)",
+    0,
+    100,
+    70,
+    5,
+    key="bridge_condition"
+)
+
+st.divider()
 
 if st.button(
-    "🎬 START BRIDGE SIMULATION",
+    "🚀 START BRIDGE SIMULATION",
     use_container_width=True,
-    key="start_bridge_simulation"
+    key="bridge_start"
 ):
 
-    st.divider()
-    st.header("🧠 N-SAGE Bridge Analysis")
+    rainfall_risk = rainfall / 10
+    water_risk = water_level * 10
+    condition_risk = 100 - bridge_condition
 
-    # Water level model
-    if rainfall < 200:
-        water_level = 0.5 + rainfall * 0.002
-    elif rainfall < 400:
-        water_level = 0.9 + (rainfall - 200) * 0.004
-    elif rainfall < 600:
-        water_level = 1.7 + (rainfall - 400) * 0.012
-    elif rainfall < 800:
-        water_level = 4.1 + (rainfall - 600) * 0.015
-    else:
-        water_level = 7.1 + (rainfall - 800) * 0.014
-
-    water_level = round(min(water_level, 10), 2)
-
-    # Bridge risk
-    rainfall_risk = rainfall / 1000 * 100
-    water_risk = water_level / 10 * 100
-
-    bridge_risk = round(
-        rainfall_risk * 0.45 +
-        water_risk * 0.55,
-        1
+    risk = (
+        rainfall_risk * 0.35
+        + water_risk * 0.40
+        + condition_risk * 0.25
     )
 
-    # ---------------- STATUS ----------------
+    risk = round(min(max(risk, 0), 100), 1)
 
-    if bridge_risk < 25:
-        bridge_status = "STABLE"
-        structural_status = "NORMAL"
-        collapse = False
+    st.subheader("🧠 N-SAGE Analysis")
 
-    elif bridge_risk < 45:
-        bridge_status = "LOW RISK"
-        structural_status = "MONITOR"
-        collapse = False
+    col1, col2, col3, col4 = st.columns(4)
 
-    elif bridge_risk < 65:
-        bridge_status = "CRITICAL"
-        structural_status = "HIGH STRESS"
-        collapse = False
+    with col1:
+        st.metric("🌧️ Rainfall", f"{rainfall} mm")
 
-    elif bridge_risk < 80:
-        bridge_status = "SEVERELY CRITICAL"
-        structural_status = "STRUCTURAL FAILURE DETECTED"
-        collapse = True
+    with col2:
+        st.metric("🌊 Water Level", f"{water_level:.1f} m")
 
-    else:
-        bridge_status = "EXTREME FAILURE RISK"
-        structural_status = "STRUCTURAL FAILURE DETECTED"
-        collapse = True
+    with col3:
+        st.metric("⚠️ Risk Score", f"{risk}/100")
 
-    # ---------------- METRICS ----------------
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
+    with col4:
         st.metric(
-            "🌧️ Rainfall",
-            f"{rainfall} mm"
-        )
-
-    with c2:
-        st.metric(
-            "🌊 Water Level",
-            f"{water_level:.2f} m"
-        )
-
-    with c3:
-        st.metric(
-            "⚠️ Bridge Risk",
-            f"{bridge_risk}/100"
-        )
-
-    with c4:
-        st.metric(
-            "🌉 Bridge Status",
-            bridge_status
+            "🌉 Bridge Condition",
+            f"{bridge_condition}%"
         )
 
     st.divider()
 
-    # ---------------- RISK ----------------
+    st.subheader("📊 Structural Risk")
 
-    st.subheader("⚠️ Structural Risk")
+    st.progress(int(risk))
 
-    st.progress(
-        int(min(bridge_risk, 100))
-    )
+    if risk < 30:
 
-    st.write(
-        f"**Rainfall Risk:** {rainfall_risk:.1f}%"
-    )
-
-    st.write(
-        f"**Water-Level Risk:** {water_risk:.1f}%"
-    )
-
-    st.write(
-        f"**Structural Condition:** {structural_status}"
-    )
-
-    # ---------------- SCENARIO ----------------
-
-    st.divider()
-    st.header("🎬 Bridge Collapse Scenario")
-
-    if collapse:
-
-        st.error(
-            "🚨 STRUCTURAL FAILURE DETECTED"
-        )
-
-        st.warning(
-            "🌊 Extreme flood conditions are affecting "
-            "the simulated bridge."
-        )
-
-        # Animation
-        placeholder = st.empty()
-
-        stages = [
-            "🌉 BRIDGE STABLE",
-            "🌊 WATER LEVEL RISING",
-            "⚠️ BRIDGE UNDER HIGH STRESS",
-            "🚨 STRUCTURAL FAILURE DETECTED",
-            "💥 BRIDGE COLLAPSE"
-        ]
-
-        for stage in stages:
-
-            placeholder.markdown(
-                f"""
-                <div style="
-                    height:220px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    background:#263238;
-                    border-radius:15px;
-                    color:white;
-                    font-size:30px;
-                    font-weight:bold;
-                    text-align:center;
-                ">
-                    {stage}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            time.sleep(0.8)
-
-        st.error(
-            "💥 BRIDGE COLLAPSE SCENARIO ACTIVATED"
-        )
-
-        st.success(
-            "🗺️ DIVERSION ROUTE RECOMMENDED"
-        )
+        st.success("🟢 BRIDGE STABLE")
 
         st.write(
-            "The simulated bridge is considered unavailable. "
-            "Residents should use the designated alternative route "
-            "in this prototype scenario."
+            "Structural failure is NOT detected "
+            "under the current simulated condition."
         )
 
-        # Simple diversion diagram
+    elif risk < 50:
+
+        st.info("🟡 BRIDGE UNDER MONITORING")
+
+        st.write(
+            "The bridge is experiencing increasing "
+            "simulated environmental stress."
+        )
+
+    elif risk < 70:
+
+        st.warning("🟠 BRIDGE CRITICAL")
+
+        st.write(
+            "High simulated stress detected. "
+            "Structural monitoring is required."
+        )
+
+    else:
+
+        st.error("🔴 STRUCTURAL FAILURE DETECTED")
+
+        st.error("💥 BRIDGE COLLAPSE SCENARIO ACTIVATED")
+
+        st.subheader("🌉 Bridge Status")
 
         st.markdown(
             """
             <div style="
-                background:#eef5ea;
-                padding:30px;
-                border-radius:15px;
+                padding:40px;
                 text-align:center;
-                font-size:22px;
+                border-radius:15px;
+                background:#263238;
+                color:white;
+                font-size:30px;
+                font-weight:bold;
             ">
-
-            🏠 RESIDENTIAL AREA
-
+            🌉 BRIDGE
             <br><br>
-
-            ↓
-
+            🚧 CLOSED
             <br><br>
-
-            🟢 ━━━━━━━━━━━━━━━━ 🟢
-            <br>
-            SAFE DIVERSION ROUTE
-            <br>
-            🟢 ━━━━━━━━━━━━━━━━ 🟢
-
-            <br><br>
-
-            🚧 BRIDGE CLOSED
-
-            <br><br>
-
-            🏫 SAFE ZONE
-
+            💥 COLLAPSE DETECTED
             </div>
             """,
             unsafe_allow_html=True
         )
 
-    else:
+        st.divider()
 
-        st.success(
-            "🟢 NO BRIDGE COLLAPSE DETECTED "
-            "UNDER THE CURRENT SIMULATED CONDITION."
+        st.success("🗺️ SAFE DIVERSION ROUTE")
+
+        st.markdown(
+            """
+            🏠 Residential Area
+            <br><br>
+            ↓
+            <br><br>
+            🟢 ━━━━━━━━━━━━━━━ 🟢
+            <br>
+            SAFE DIVERSION ROUTE
+            <br>
+            🟢 ━━━━━━━━━━━━━━━ 🟢
+            <br><br>
+            🏫 Safe Zone
+            """,
+            unsafe_allow_html=True
         )
 
-        st.info(
-            "🌉 Bridge remains operational in this prototype scenario."
-        )
+st.divider()
 
-    # ---------------- FINAL ----------------
-
-    st.divider()
-
-    st.header("📋 Final Bridge Assessment")
-
-    st.write(
-        f"🌧️ **Rainfall:** {rainfall} mm"
-    )
-
-    st.write(
-        f"🌊 **Estimated Water Level:** {water_level:.2f} m"
-    )
-
-    st.write(
-        f"⚠️ **Bridge Risk Score:** {bridge_risk}/100"
-    )
-
-    st.write(
-        f"🌉 **Bridge Condition:** {bridge_status}"
-    )
-
-    st.write(
-        f"🏗️ **Structural Status:** {structural_status}"
-    )
-
-    st.write(
-        "💥 **Collapse:** "
-        + ("DETECTED" if collapse else "NOT DETECTED")
-    )
-
-    st.divider()
-
-    st.info(
-        "⚠️ N-SAGE is a prototype demonstration system. "
-        "Risk scores, thresholds, simulations, diversion "
-        "recommendations and emergency responses are illustrative only."
-    )
+st.info(
+    "⚠️ N-SAGE is a prototype demonstration system. "
+    "All risk scores and simulations are illustrative only "
+    "and must not be treated as real structural predictions."
+)
