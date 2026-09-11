@@ -1,345 +1,408 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
-st.set_page_config(
-    page_title="N-SAGE Residential Flood",
-    page_icon="🌊",
-    layout="wide"
-)
 
 # ============================================================
-# HEADER
+# FLOOD SIMULATION FUNCTION
 # ============================================================
 
-st.title("🛰️ N-SAGE")
-st.subheader("AI-Based Residential Flood Risk Analysis & Emergency Response")
+def show_flood():
 
-st.write(
-    "Select the expected rainfall and run the simulation. "
-    "N-SAGE will automatically analyse the resulting flood "
-    "conditions and determine the emergency response."
-)
+    st.title("🌊 N-SAGE Residential Flood Analysis")
 
-st.divider()
-
-# ============================================================
-# RAINFALL INPUT
-# ============================================================
-
-st.header("🌧️ Environmental Condition")
-
-rainfall = st.slider(
-    "Expected Rainfall (mm)",
-    min_value=0,
-    max_value=1000,
-    value=300,
-    step=10
-)
-
-st.metric(
-    "🌧️ Selected Rainfall",
-    f"{rainfall} mm"
-)
-
-# ============================================================
-# SIMULATION BUTTON
-# ============================================================
-
-simulate = st.button(
-    "🎬 SIMULATE FLOOD",
-    use_container_width=True,
-    type="primary"
-)
-
-# ============================================================
-# SIMULATION
-# ============================================================
-
-if simulate:
-
-    # --------------------------------------------------------
-    # WATER LEVEL
-    # --------------------------------------------------------
-
-    if rainfall < 150:
-        water_level = round(0.4 + rainfall * 0.002, 2)
-
-    elif rainfall < 300:
-        water_level = round(0.7 + rainfall * 0.003, 2)
-
-    elif rainfall < 500:
-        water_level = round(
-            1.6 + (rainfall - 300) * 0.006,
-            2
-        )
-
-    elif rainfall < 700:
-        water_level = round(
-            2.8 + (rainfall - 500) * 0.012,
-            2
-        )
-
-    elif rainfall < 850:
-        water_level = round(
-            5.2 + (rainfall - 700) * 0.020,
-            2
-        )
-
-    else:
-        water_level = round(
-            8.2 + (rainfall - 850) * 0.012,
-            2
-        )
-
-    # --------------------------------------------------------
-    # FLOOD DEPTH
-    # --------------------------------------------------------
-
-    if rainfall < 200:
-        flood_depth = round(water_level * 0.35, 2)
-
-    elif rainfall < 400:
-        flood_depth = round(water_level * 0.50, 2)
-
-    elif rainfall < 600:
-        flood_depth = round(water_level * 0.65, 2)
-
-    elif rainfall < 800:
-        flood_depth = round(water_level * 0.78, 2)
-
-    else:
-        flood_depth = round(water_level * 0.90, 2)
-
-    # --------------------------------------------------------
-    # RISK CALCULATION
-    # --------------------------------------------------------
-
-    rainfall_risk = (rainfall / 1000) * 100
-
-    water_risk = min(
-        (water_level / 10) * 100,
-        100
+    st.subheader(
+        "AI-Based Residential Flood Risk Analysis & Emergency Response"
     )
 
-    depth_risk = min(
-        (flood_depth / 8) * 100,
-        100
+    st.write(
+        "Select the expected rainfall and run the simulation. "
+        "N-SAGE will automatically analyse the resulting "
+        "flood conditions."
     )
-
-    risk_score = round(
-        rainfall_risk * 0.50
-        + water_risk * 0.25
-        + depth_risk * 0.25,
-        1
-    )
-
-    # --------------------------------------------------------
-    # CLASSIFICATION
-    # --------------------------------------------------------
-
-    if rainfall < 200:
-
-        flood_status = "LOW"
-        house_status = "SAFE"
-        road_status = "OPEN"
-        emergency = "NORMAL"
-        evacuation = False
-        simulation_level = "low"
-
-    elif rainfall < 400:
-
-        flood_status = "MODERATE"
-        house_status = "MONITOR"
-        road_status = "CAUTION"
-        emergency = "WATCH"
-        evacuation = False
-        simulation_level = "moderate"
-
-    elif rainfall < 600:
-
-        flood_status = "HIGH"
-        house_status = "AT RISK"
-        road_status = "RESTRICTED"
-        emergency = "WARNING"
-        evacuation = False
-        simulation_level = "high"
-
-    elif rainfall < 800:
-
-        flood_status = "VERY HIGH"
-        house_status = "SEVERELY AT RISK"
-        road_status = "DANGEROUS"
-        emergency = "HIGH ALERT"
-        evacuation = True
-        simulation_level = "veryhigh"
-
-    else:
-
-        flood_status = "EXTREME"
-        house_status = "SEVERELY AFFECTED"
-        road_status = "BLOCKED"
-        emergency = "EMERGENCY"
-        evacuation = True
-        simulation_level = "extreme"
-
-    # ========================================================
-    # AUTOMATIC ANALYSIS
-    # ========================================================
 
     st.divider()
 
-    st.header("🧠 N-SAGE Automatic Analysis")
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-        st.metric(
-            "🌧️ Rainfall",
-            f"{rainfall} mm"
-        )
-
-    with c2:
-        st.metric(
-            "🌊 Estimated Water Level",
-            f"{water_level:.2f} m"
-        )
-
-    with c3:
-        st.metric(
-            "🌊 Estimated Flood Depth",
-            f"{flood_depth:.2f} m"
-        )
-
-    with c4:
-        st.metric(
-            "🧠 Risk Score",
-            f"{risk_score}/100"
-        )
-
     # ========================================================
-    # OVERALL RISK
+    # RAINFALL INPUT
     # ========================================================
 
-    st.subheader("📊 Overall Flood Risk")
+    st.header("🌧️ Environmental Condition")
 
-    st.progress(
-        min(int(risk_score), 100)
+    rainfall = st.slider(
+        "Expected Rainfall (mm)",
+        min_value=0,
+        max_value=1000,
+        value=300,
+        step=10,
+        key="flood_rainfall"
     )
 
-    if rainfall < 200:
-
-        st.success(
-            "🟢 SAFE — No critical flood condition detected."
-        )
-
-    elif rainfall < 400:
-
-        st.info(
-            "🟡 MODERATE — Flood conditions should be monitored."
-        )
-
-    elif rainfall < 600:
-
-        st.warning(
-            "🟠 HIGH — Residential areas may experience flooding."
-        )
-
-    elif rainfall < 800:
-
-        st.warning(
-            "🟠 VERY HIGH — Severe flooding is developing. "
-            "Prepare for evacuation."
-        )
-
-    else:
-
-        st.error(
-            "🔴 EXTREME — Severe residential flooding detected. "
-            "Immediate evacuation response activated."
-        )
+    st.metric(
+        "🌧️ Selected Rainfall",
+        f"{rainfall} mm"
+    )
 
     # ========================================================
-    # RISK FACTORS
+    # SIMULATION BUTTON
     # ========================================================
 
-    st.divider()
+    simulate = st.button(
+        "🎬 SIMULATE FLOOD",
+        key="simulate_flood",
+        use_container_width=True
+    )
 
-    st.header("🔍 Risk Factors")
+    # ========================================================
+    # ANALYSIS
+    # ========================================================
 
-    r1, r2 = st.columns(2)
+    if simulate:
 
-    with r1:
+        # ----------------------------------------------------
+        # WATER LEVEL
+        # ----------------------------------------------------
 
-        st.write(
-            f"🌧️ **Rainfall Risk:** {rainfall_risk:.1f}%"
+        if rainfall < 150:
+
+            water_level = round(
+                0.4 + rainfall * 0.002,
+                2
+            )
+
+        elif rainfall < 300:
+
+            water_level = round(
+                0.7 + rainfall * 0.003,
+                2
+            )
+
+        elif rainfall < 500:
+
+            water_level = round(
+                1.6 + (rainfall - 300) * 0.006,
+                2
+            )
+
+        elif rainfall < 700:
+
+            water_level = round(
+                2.8 + (rainfall - 500) * 0.012,
+                2
+            )
+
+        elif rainfall < 850:
+
+            water_level = round(
+                5.2 + (rainfall - 700) * 0.020,
+                2
+            )
+
+        else:
+
+            water_level = round(
+                8.2 + (rainfall - 850) * 0.012,
+                2
+            )
+
+        # ----------------------------------------------------
+        # FLOOD DEPTH
+        # ----------------------------------------------------
+
+        if rainfall < 200:
+
+            flood_depth = round(
+                water_level * 0.35,
+                2
+            )
+
+        elif rainfall < 400:
+
+            flood_depth = round(
+                water_level * 0.50,
+                2
+            )
+
+        elif rainfall < 600:
+
+            flood_depth = round(
+                water_level * 0.65,
+                2
+            )
+
+        elif rainfall < 800:
+
+            flood_depth = round(
+                water_level * 0.78,
+                2
+            )
+
+        else:
+
+            flood_depth = round(
+                water_level * 0.90,
+                2
+            )
+
+        # ====================================================
+        # RISK SCORE
+        # ====================================================
+
+        rainfall_risk = (
+            rainfall / 1000
+        ) * 100
+
+        water_risk = min(
+            (water_level / 10) * 100,
+            100
         )
+
+        depth_risk = min(
+            (flood_depth / 8) * 100,
+            100
+        )
+
+        risk_score = round(
+            rainfall_risk * 0.50
+            + water_risk * 0.25
+            + depth_risk * 0.25,
+            1
+        )
+
+        # ====================================================
+        # CLASSIFICATION
+        # ====================================================
+
+        if rainfall < 200:
+
+            flood_status = "LOW"
+            house_status = "SAFE"
+            road_status = "OPEN"
+            emergency = "NORMAL"
+            evacuation = False
+
+        elif rainfall < 400:
+
+            flood_status = "MODERATE"
+            house_status = "MONITOR"
+            road_status = "CAUTION"
+            emergency = "WATCH"
+            evacuation = False
+
+        elif rainfall < 600:
+
+            flood_status = "HIGH"
+            house_status = "AT RISK"
+            road_status = "RESTRICTED"
+            emergency = "WARNING"
+            evacuation = False
+
+        elif rainfall < 800:
+
+            flood_status = "VERY HIGH"
+            house_status = "SEVERELY AT RISK"
+            road_status = "DANGEROUS"
+            emergency = "HIGH ALERT"
+            evacuation = True
+
+        else:
+
+            flood_status = "EXTREME"
+            house_status = "SEVERELY AFFECTED"
+            road_status = "BLOCKED"
+            emergency = "EMERGENCY"
+            evacuation = True
+
+        # ====================================================
+        # AUTOMATIC ANALYSIS
+        # ====================================================
+
+        st.divider()
+
+        st.header("🧠 N-SAGE Automatic Analysis")
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        with c1:
+
+            st.metric(
+                "🌧️ Rainfall",
+                f"{rainfall} mm"
+            )
+
+        with c2:
+
+            st.metric(
+                "🌊 Estimated Water Level",
+                f"{water_level:.2f} m"
+            )
+
+        with c3:
+
+            st.metric(
+                "🌊 Estimated Flood Depth",
+                f"{flood_depth:.2f} m"
+            )
+
+        with c4:
+
+            st.metric(
+                "🧠 Risk Score",
+                f"{risk_score}/100"
+            )
+
+        # ====================================================
+        # OVERALL RISK
+        # ====================================================
+
+        st.subheader("📊 Overall Flood Risk")
 
         st.progress(
-            min(int(rainfall_risk), 100)
+            min(int(risk_score), 100)
         )
 
-        st.write(
-            f"🌊 **Water-Level Risk:** {water_risk:.1f}%"
+        if rainfall < 200:
+
+            st.success(
+                "🟢 SAFE — No critical flood condition detected."
+            )
+
+        elif rainfall < 400:
+
+            st.info(
+                "🟡 MODERATE — Flood conditions should be monitored."
+            )
+
+        elif rainfall < 600:
+
+            st.warning(
+                "🟠 HIGH — Residential areas may experience flooding."
+            )
+
+        elif rainfall < 800:
+
+            st.warning(
+                "🟠 VERY HIGH — Severe flooding is developing. "
+                "Prepare for evacuation."
+            )
+
+        else:
+
+            st.error(
+                "🔴 EXTREME — Severe residential flooding detected. "
+                "Immediate evacuation response activated."
+            )
+
+        # ====================================================
+        # RISK FACTORS
+        # ====================================================
+
+        st.divider()
+
+        st.header("🔍 Risk Factors")
+
+        r1, r2 = st.columns(2)
+
+        with r1:
+
+            st.write(
+                f"🌧️ **Rainfall Risk:** "
+                f"{rainfall_risk:.1f}%"
+            )
+
+            st.progress(
+                min(int(rainfall_risk), 100)
+            )
+
+            st.write(
+                f"🌊 **Water-Level Risk:** "
+                f"{water_risk:.1f}%"
+            )
+
+            st.progress(
+                min(int(water_risk), 100)
+            )
+
+        with r2:
+
+            st.write(
+                f"🌊 **Flood-Depth Risk:** "
+                f"{depth_risk:.1f}%"
+            )
+
+            st.progress(
+                min(int(depth_risk), 100)
+            )
+
+            st.write(
+                f"🏠 **Residential Impact:** "
+                f"{house_status}"
+            )
+
+        # ====================================================
+        # RESIDENTIAL ASSESSMENT
+        # ====================================================
+
+        st.divider()
+
+        st.header("🏠 Residential Area Assessment")
+
+        h1, h2, h3 = st.columns(3)
+
+        with h1:
+
+            st.metric(
+                "🏠 House Condition",
+                house_status
+            )
+
+        with h2:
+
+            st.metric(
+                "🚗 Road Condition",
+                road_status
+            )
+
+        with h3:
+
+            st.metric(
+                "🚨 Emergency Level",
+                emergency
+            )
+
+        # ====================================================
+        # SIMULATION LEVEL
+        # ====================================================
+
+        if rainfall < 200:
+
+            simulation_level = "low"
+
+        elif rainfall < 400:
+
+            simulation_level = "moderate"
+
+        elif rainfall < 600:
+
+            simulation_level = "high"
+
+        elif rainfall < 800:
+
+            simulation_level = "veryhigh"
+
+        else:
+
+            simulation_level = "extreme"
+
+        # ====================================================
+        # LIVE SIMULATION
+        # ====================================================
+
+        st.divider()
+
+        st.header(
+            "🎬 Live Flood & Residential Simulation"
         )
 
-        st.progress(
-            min(int(water_risk), 100)
-        )
-
-    with r2:
-
-        st.write(
-            f"🌊 **Flood-Depth Risk:** {depth_risk:.1f}%"
-        )
-
-        st.progress(
-            min(int(depth_risk), 100)
-        )
-
-        st.write(
-            f"🏠 **Residential Impact:** {house_status}"
-        )
-
-    # ========================================================
-    # RESIDENTIAL ASSESSMENT
-    # ========================================================
-
-    st.divider()
-
-    st.header("🏠 Residential Area Assessment")
-
-    h1, h2, h3 = st.columns(3)
-
-    with h1:
-
-        st.metric(
-            "🏠 House Condition",
-            house_status
-        )
-
-    with h2:
-
-        st.metric(
-            "🚗 Road Condition",
-            road_status
-        )
-
-    with h3:
-
-        st.metric(
-            "🚨 Emergency Level",
-            emergency
-        )
-
-    # ========================================================
-    # LIVE SIMULATION
-    # ========================================================
-
-    st.divider()
-
-    st.header("🎬 Live Flood & Residential Simulation")
-
-    html = f"""
+        html = f"""
 <!DOCTYPE html>
 
 <html>
@@ -352,22 +415,20 @@ if simulate:
     box-sizing: border-box;
 }}
 
-html, body {{
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-}}
-
 body {{
+    margin: 0;
     overflow: hidden;
     font-family: Arial, sans-serif;
 }}
 
 .scene {{
+
     position: relative;
+
     width: 100%;
+
     height: 650px;
+
     overflow: hidden;
 
     background:
@@ -382,50 +443,78 @@ body {{
 /* CLOUDS */
 
 .cloud {{
+
     position: absolute;
+
     width: 230px;
+
     height: 60px;
+
     border-radius: 50px;
+
     background: #37444f;
 }}
 
 .cloud::before {{
+
     content: "";
+
     position: absolute;
+
     left: 30px;
+
     top: -35px;
+
     width: 80px;
+
     height: 80px;
+
     border-radius: 50%;
+
     background: #37444f;
 }}
 
 .cloud::after {{
+
     content: "";
+
     position: absolute;
+
     right: 25px;
+
     top: -45px;
+
     width: 95px;
+
     height: 95px;
+
     border-radius: 50%;
+
     background: #37444f;
 }}
 
 .cloud1 {{
+
     left: 5%;
+
     top: 75px;
 }}
 
 .cloud2 {{
+
     right: 5%;
+
     top: 110px;
 }}
 
 /* RAIN */
 
 .rain {{
+
     position: absolute;
+
     inset: 0;
+
     z-index: 20;
 
     background-image:
@@ -455,9 +544,13 @@ body {{
 /* GROUND */
 
 .ground {{
+
     position: absolute;
+
     bottom: 0;
+
     width: 100%;
+
     height: 250px;
 
     background:
@@ -473,12 +566,19 @@ body {{
 /* HOUSES */
 
 .house {{
+
     position: absolute;
+
     bottom: 180px;
+
     width: 175px;
+
     height: 130px;
+
     background: #d8c29a;
+
     border: 5px solid #62503e;
+
     z-index: 30;
 }}
 
@@ -495,11 +595,17 @@ body {{
 }}
 
 .roof {{
+
     position: absolute;
+
     left: -20px;
+
     top: -72px;
+
     width: 210px;
+
     height: 100px;
+
     background: #744a38;
 
     clip-path:
@@ -511,12 +617,19 @@ body {{
 }}
 
 .window {{
+
     position: absolute;
+
     left: 20px;
+
     top: 30px;
+
     width: 42px;
+
     height: 48px;
+
     background: #8fc3d8;
+
     border: 5px solid #554737;
 }}
 
@@ -525,31 +638,49 @@ body {{
 }}
 
 .door {{
+
     position: absolute;
+
     left: 65px;
+
     bottom: 0;
+
     width: 45px;
+
     height: 72px;
+
     background: #634833;
+
     border: 4px solid #453126;
 }}
 
 /* ROAD */
 
 .road {{
+
     position: absolute;
+
     left: 0;
+
     bottom: 90px;
+
     width: 100%;
+
     height: 80px;
+
     background: #454746;
+
     z-index: 15;
 }}
 
 .road-line {{
+
     position: absolute;
+
     top: 37px;
+
     width: 100%;
+
     height: 5px;
 
     background:
@@ -565,13 +696,21 @@ body {{
 /* CAR */
 
 .car {{
+
     position: absolute;
+
     left: -120px;
+
     bottom: 120px;
+
     width: 105px;
+
     height: 45px;
+
     background: #b53232;
+
     border-radius: 18px 18px 8px 8px;
+
     z-index: 27;
 
     animation:
@@ -579,13 +718,21 @@ body {{
 }}
 
 .car::before {{
+
     content: "";
+
     position: absolute;
+
     left: 20px;
+
     top: -22px;
+
     width: 65px;
+
     height: 28px;
+
     background: #b53232;
+
     border-radius: 15px 15px 0 0;
 }}
 
@@ -603,10 +750,15 @@ body {{
 /* PERSON */
 
 .person {{
+
     position: absolute;
+
     left: 67%;
+
     bottom: 155px;
+
     font-size: 42px;
+
     z-index: 35;
 
     animation:
@@ -626,10 +778,18 @@ body {{
 
 /* WATER */
 
-.water {{
+.water-low,
+.water-moderate,
+.water-high,
+.water-veryhigh,
+.water-extreme {{
+
     position: absolute;
+
     left: 0;
+
     bottom: 0;
+
     width: 100%;
 
     background:
@@ -644,10 +804,28 @@ body {{
 
     z-index: 40;
 
-    height: {40 if simulation_level == "low" else 90 if simulation_level == "moderate" else 145 if simulation_level == "high" else 195 if simulation_level == "veryhigh" else 245}px;
-
     animation:
         waterRise 5s ease-in-out forwards;
+}}
+
+.water-low {{
+    height: 40px;
+}}
+
+.water-moderate {{
+    height: 90px;
+}}
+
+.water-high {{
+    height: 145px;
+}}
+
+.water-veryhigh {{
+    height: 195px;
+}}
+
+.water-extreme {{
+    height: 245px;
 }}
 
 @keyframes waterRise {{
@@ -664,10 +842,15 @@ body {{
 /* WAVES */
 
 .wave {{
+
     position: absolute;
+
     left: 0;
+
     top: -15px;
+
     width: 100%;
+
     height: 25px;
 
     background:
@@ -697,13 +880,17 @@ body {{
 /* SAFE ZONE */
 
 .shelter {{
+
     position: absolute;
+
     right: 4%;
+
     top: 240px;
 
     padding: 14px 20px;
 
     background: #188a43;
+
     color: white;
 
     font-weight: bold;
@@ -716,8 +903,11 @@ body {{
 /* WARNING */
 
 .warning {{
+
     position: absolute;
+
     left: 50%;
+
     top: 18px;
 
     transform: translateX(-50%);
@@ -725,11 +915,13 @@ body {{
     padding: 12px 25px;
 
     background: rgba(0,0,0,.80);
+
     color: white;
 
     border-radius: 10px;
 
     font-size: 20px;
+
     font-weight: bold;
 
     z-index: 100;
@@ -737,11 +929,12 @@ body {{
     white-space: nowrap;
 }}
 
-/* INFO */
-
 .info {{
+
     position: absolute;
+
     left: 20px;
+
     bottom: 18px;
 
     padding: 10px 15px;
@@ -776,28 +969,45 @@ body {{
 <div class="ground"></div>
 
 <div class="house house1">
+
 <div class="roof"></div>
+
 <div class="window"></div>
+
 <div class="window window2"></div>
+
 <div class="door"></div>
+
 </div>
 
 <div class="house house2">
+
 <div class="roof"></div>
+
 <div class="window"></div>
+
 <div class="window window2"></div>
+
 <div class="door"></div>
+
 </div>
 
 <div class="house house3">
+
 <div class="roof"></div>
+
 <div class="window"></div>
+
 <div class="window window2"></div>
+
 <div class="door"></div>
+
 </div>
 
 <div class="road">
+
 <div class="road-line"></div>
+
 </div>
 
 <div class="car"></div>
@@ -810,8 +1020,10 @@ body {{
 🏫 SAFE ZONE
 </div>
 
-<div class="water">
+<div class="water-{simulation_level}">
+
 <div class="wave"></div>
+
 </div>
 
 <div class="info">
@@ -835,37 +1047,41 @@ body {{
 </html>
 """
 
-    components.html(
-        html,
-        height=650,
-        scrolling=False
-    )
-
-    # ========================================================
-    # EMERGENCY RESPONSE
-    # ========================================================
-
-    st.divider()
-
-    st.header("🚨 Emergency Response")
-
-    if evacuation:
-
-        st.error(
-            "🚨 EVACUATION RECOMMENDED"
+        st.components.v1.html(
+            html,
+            height=650,
+            scrolling=False
         )
 
-        st.write(
-            "N-SAGE has detected a severe simulated flood "
-            "condition. Residents should move toward the "
-            "designated safe zone."
-        )
+        # ====================================================
+        # EMERGENCY RESPONSE
+        # ====================================================
 
-        st.success(
-            "🗺️ SAFE EVACUATION ROUTE ACTIVATED"
-        )
+        st.divider()
 
-        route_html = """
+        st.header("🚨 Emergency Response")
+
+        if evacuation:
+
+            st.error(
+                "🚨 EVACUATION RECOMMENDED"
+            )
+
+            st.write(
+                "N-SAGE has detected a severe simulated "
+                "flood condition. Residents should move "
+                "toward the designated safe zone."
+            )
+
+            st.success(
+                "🗺️ SAFE EVACUATION ROUTE ACTIVATED"
+            )
+
+            # ------------------------------------------------
+            # EVACUATION MAP
+            # ------------------------------------------------
+
+            route_html = """
 <!DOCTYPE html>
 
 <html>
@@ -874,14 +1090,14 @@ body {{
 
 <style>
 
-* {
-    box-sizing: border-box;
-}
-
 body {
+
     margin: 0;
+
     overflow: hidden;
+
     font-family: Arial;
+
 }
 
 .map {
@@ -893,11 +1109,13 @@ body {
     height: 430px;
 
     background:
+
         linear-gradient(
             45deg,
             #dce8d4 25%,
             transparent 25%
         ),
+
         linear-gradient(
             -45deg,
             #dce8d4 25%,
@@ -907,6 +1125,7 @@ body {
     background-size: 70px 70px;
 
     background-color: #edf4e8;
+
 }
 
 .road {
@@ -926,6 +1145,7 @@ body {
     transform: rotate(-4deg);
 
     z-index: 5;
+
 }
 
 .flooded {
@@ -941,6 +1161,7 @@ body {
     height: 80px;
 
     background:
+
         repeating-linear-gradient(
             45deg,
             #d52222 0,
@@ -952,6 +1173,7 @@ body {
     transform: rotate(-4deg);
 
     z-index: 20;
+
 }
 
 .label {
@@ -973,6 +1195,7 @@ body {
     border-radius: 8px;
 
     z-index: 30;
+
 }
 
 .route {
@@ -996,6 +1219,7 @@ body {
 
     animation:
         pulse 1.5s infinite alternate;
+
 }
 
 @keyframes pulse {
@@ -1007,6 +1231,7 @@ body {
     to {
         opacity: 1;
     }
+
 }
 
 .start {
@@ -1028,6 +1253,7 @@ body {
     border-radius: 8px;
 
     z-index: 40;
+
 }
 
 .safe {
@@ -1049,6 +1275,7 @@ body {
     border-radius: 10px;
 
     z-index: 40;
+
 }
 
 </style>
@@ -1084,97 +1311,92 @@ body {
 </html>
 """
 
-        components.html(
-            route_html,
-            height=430,
-            scrolling=False
-        )
-
-    else:
-
-        st.success(
-            "🟢 NO EVACUATION REQUIRED under "
-            "the current simulated condition."
-        )
-
-    # ========================================================
-    # FINAL ASSESSMENT
-    # ========================================================
-
-    st.divider()
-
-    st.header("📋 N-SAGE Final Assessment")
-
-    f1, f2 = st.columns(2)
-
-    with f1:
-
-        st.write(
-            f"🌧️ **Rainfall:** {rainfall} mm"
-        )
-
-        st.write(
-            f"🌊 **Estimated Water Level:** "
-            f"{water_level:.2f} m"
-        )
-
-        st.write(
-            f"🌊 **Estimated Flood Depth:** "
-            f"{flood_depth:.2f} m"
-        )
-
-        st.write(
-            f"🧠 **N-SAGE Risk Score:** "
-            f"{risk_score}/100"
-        )
-
-    with f2:
-
-        st.write(
-            f"🌊 **Flood Classification:** "
-            f"{flood_status}"
-        )
-
-        st.write(
-            f"🏠 **Residential Condition:** "
-            f"{house_status}"
-        )
-
-        st.write(
-            f"🚗 **Road Condition:** "
-            f"{road_status}"
-        )
-
-        st.write(
-            f"🚨 **Emergency Level:** "
-            f"{emergency}"
-        )
-
-        st.write(
-            "🏃 **Evacuation:** "
-            + (
-                "RECOMMENDED"
-                if evacuation
-                else "NOT REQUIRED"
+            st.components.v1.html(
+                route_html,
+                height=430,
+                scrolling=False
             )
+
+        else:
+
+            st.success(
+                "🟢 NO EVACUATION REQUIRED under "
+                "the current simulated condition."
+            )
+
+        # ====================================================
+        # FINAL ASSESSMENT
+        # ====================================================
+
+        st.divider()
+
+        st.header("📋 N-SAGE Final Assessment")
+
+        f1, f2 = st.columns(2)
+
+        with f1:
+
+            st.write(
+                f"🌧️ **Rainfall:** {rainfall} mm"
+            )
+
+            st.write(
+                f"🌊 **Estimated Water Level:** "
+                f"{water_level:.2f} m"
+            )
+
+            st.write(
+                f"🌊 **Estimated Flood Depth:** "
+                f"{flood_depth:.2f} m"
+            )
+
+            st.write(
+                f"🧠 **N-SAGE Risk Score:** "
+                f"{risk_score}/100"
+            )
+
+        with f2:
+
+            st.write(
+                f"🌊 **Flood Classification:** "
+                f"{flood_status}"
+            )
+
+            st.write(
+                f"🏠 **Residential Condition:** "
+                f"{house_status}"
+            )
+
+            st.write(
+                f"🚗 **Road Condition:** "
+                f"{road_status}"
+            )
+
+            st.write(
+                f"🚨 **Emergency Level:** "
+                f"{emergency}"
+            )
+
+            st.write(
+                "🏃 **Evacuation:** "
+                + (
+                    "RECOMMENDED"
+                    if evacuation
+                    else "NOT REQUIRED"
+                )
+            )
+
+        # ====================================================
+        # DISCLAIMER
+        # ====================================================
+
+        st.divider()
+
+        st.info(
+            "⚠️ N-SAGE is a prototype disaster-risk "
+            "visualization. Water level, flood depth, "
+            "risk scores and thresholds are simulated "
+            "values for demonstration and are not real "
+            "flood forecasting or emergency-navigation "
+            "predictions."
         )
-
-    # ========================================================
-    # DISCLAIMER
-    # ========================================================
-
-    st.info(
-        "⚠️ N-SAGE is a prototype disaster-risk "
-        "visualization. Water level, flood depth, "
-        "risk scores and thresholds are simulated "
-        "values for demonstration and are not real "
-        "flood forecasting or emergency-navigation "
-        "predictions."
-    )
-
-else:
-
-    st.info(
-        "👆 Select rainfall and click "
-        "**🎬 SIMULATE FLOOD** to start the N-SAGE analysis."
-    )
