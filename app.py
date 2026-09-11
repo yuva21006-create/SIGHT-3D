@@ -1,4 +1,5 @@
 import streamlit as st
+import importlib
 
 # ============================================================
 # N-SAGE MAIN APPLICATION
@@ -38,7 +39,7 @@ if st.session_state.page == "home":
     st.divider()
 
     # ========================================================
-    # FLOOD
+    # RESIDENTIAL FLOOD
     # ========================================================
 
     st.header("🌊 Residential Flood Analysis")
@@ -90,7 +91,6 @@ if st.session_state.page == "home":
 
 elif st.session_state.page == "flood":
 
-    # Unique key
     if st.button(
         "⬅️ BACK TO N-SAGE HOME",
         key="back_home_flood"
@@ -100,15 +100,18 @@ elif st.session_state.page == "flood":
 
     st.divider()
 
-    st.header("🌊 Residential Flood Simulation")
-
-    # ========================================================
-    # LOAD FLOOD MODULE
-    # ========================================================
+    # --------------------------------------------------------
+    # LOAD / RELOAD FLOOD MODULE
+    # --------------------------------------------------------
 
     try:
 
         import flood
+
+        # IMPORTANT:
+        # Reload flood.py on every Streamlit rerun so that
+        # SIMULATE FLOOD buttons work correctly.
+        importlib.reload(flood)
 
     except Exception as e:
 
@@ -123,7 +126,6 @@ elif st.session_state.page == "flood":
 
 elif st.session_state.page == "landslide":
 
-    # Unique key
     if st.button(
         "⬅️ BACK TO N-SAGE HOME",
         key="back_home_landslide"
@@ -133,15 +135,11 @@ elif st.session_state.page == "landslide":
 
     st.divider()
 
-    st.header("⛰️ Landslide Simulation")
-
-    # ========================================================
-    # LOAD LANDSLIDE MODULE
-    # ========================================================
-
     try:
 
         import landslide
+
+        importlib.reload(landslide)
 
     except Exception as e:
 
