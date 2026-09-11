@@ -1,10 +1,15 @@
 import streamlit as st
 
+# ============================================================
+# PAGE CONFIGURATION
+# ============================================================
+
 st.set_page_config(
     page_title="N-SAGE",
     page_icon="🛰️",
     layout="wide"
 )
+
 
 # ============================================================
 # SESSION STATE
@@ -15,7 +20,7 @@ if "page" not in st.session_state:
 
 
 # ============================================================
-# HOME
+# HOME PAGE
 # ============================================================
 
 if st.session_state.page == "home":
@@ -33,20 +38,20 @@ if st.session_state.page == "home":
 
     st.divider()
 
-    # --------------------------------------------------------
-    # FLOOD
-    # --------------------------------------------------------
+    # ========================================================
+    # RESIDENTIAL FLOOD
+    # ========================================================
 
     st.header("🌊 Residential Flood Analysis")
 
     st.write(
-        "Analyse rainfall, water level, flood depth, "
-        "residential impact and emergency response."
+        "Analyse rainfall conditions, estimated water level, "
+        "flood depth, residential impact and emergency response."
     )
 
     if st.button(
-        "🌊 OPEN RESIDENTIAL FLOOD",
-        key="open_flood",
+        "🌊 OPEN RESIDENTIAL FLOOD SIMULATION",
+        key="open_flood_button",
         use_container_width=True
     ):
         st.session_state.page = "flood"
@@ -54,20 +59,20 @@ if st.session_state.page == "home":
 
     st.divider()
 
-    # --------------------------------------------------------
-    # BRIDGE
-    # --------------------------------------------------------
+    # ========================================================
+    # BRIDGE COLLAPSE
+    # ========================================================
 
     st.header("🌉 Bridge Collapse Analysis")
 
     st.write(
-        "Analyse rainfall, flooding and bridge "
-        "structural failure."
+        "Analyse extreme rainfall, flood conditions, "
+        "bridge risk and structural failure."
     )
 
     if st.button(
-        "🌉 OPEN BRIDGE COLLAPSE",
-        key="open_bridge",
+        "🌉 OPEN BRIDGE COLLAPSE SIMULATION",
+        key="open_bridge_button",
         use_container_width=True
     ):
         st.session_state.page = "bridge"
@@ -75,20 +80,20 @@ if st.session_state.page == "home":
 
     st.divider()
 
-    # --------------------------------------------------------
+    # ========================================================
     # LANDSLIDE
-    # --------------------------------------------------------
+    # ========================================================
 
     st.header("⛰️ Landslide Analysis")
 
     st.write(
         "Analyse rainfall and terrain-related "
-        "landslide conditions."
+        "landslide risks."
     )
 
     if st.button(
-        "⛰️ OPEN LANDSLIDE",
-        key="open_landslide",
+        "⛰️ OPEN LANDSLIDE SIMULATION",
+        key="open_landslide_button",
         use_container_width=True
     ):
         st.session_state.page = "landslide"
@@ -108,50 +113,54 @@ if st.session_state.page == "home":
 
 elif st.session_state.page == "flood":
 
-    st.title("🌊 Residential Flood Analysis")
-
     if st.button(
         "⬅️ BACK TO N-SAGE HOME",
-        key="back_flood"
+        key="flood_back_button"
     ):
         st.session_state.page = "home"
         st.rerun()
 
     st.divider()
 
+    # Import the flood module
     try:
+
         import flood
+
+        flood.show_flood()
 
     except Exception as e:
 
-        st.error("❌ Error loading flood.py")
+        st.error("❌ Flood simulation could not be loaded.")
 
         st.exception(e)
 
 
 # ============================================================
-# BRIDGE PAGE
+# BRIDGE COLLAPSE PAGE
 # ============================================================
 
 elif st.session_state.page == "bridge":
 
-    st.title("🌉 Bridge Collapse Analysis")
-
     if st.button(
         "⬅️ BACK TO N-SAGE HOME",
-        key="back_bridge"
+        key="bridge_back_button"
     ):
         st.session_state.page = "home"
         st.rerun()
 
     st.divider()
 
+    # Import the bridge module
     try:
+
         import bridge
+
+        bridge.show_bridge()
 
     except Exception as e:
 
-        st.error("❌ Error loading bridge.py")
+        st.error("❌ Bridge simulation could not be loaded.")
 
         st.exception(e)
 
@@ -162,22 +171,24 @@ elif st.session_state.page == "bridge":
 
 elif st.session_state.page == "landslide":
 
-    st.title("⛰️ Landslide Analysis")
-
     if st.button(
         "⬅️ BACK TO N-SAGE HOME",
-        key="back_landslide"
+        key="landslide_back_button"
     ):
         st.session_state.page = "home"
         st.rerun()
 
     st.divider()
 
+    # Import the landslide module
     try:
+
         import landslide
+
+        landslide.show_landslide()
 
     except Exception as e:
 
-        st.error("❌ Error loading landslide.py")
+        st.error("❌ Landslide simulation could not be loaded.")
 
         st.exception(e)
